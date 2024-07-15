@@ -1,3 +1,8 @@
+google-api-core==2.19.1
+google-api-python-client==2.137.0
+google-auth==2.32.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.1
 absl-py==2.1.0
 altair==5.3.0
 astunparse==1.6.3
