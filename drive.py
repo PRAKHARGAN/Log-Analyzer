@@ -20,7 +20,7 @@ def authenticate_gdrive(auth_code=None):
 
     if not creds or not creds.valid:
         flow = Flow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
-        flow.redirect_uri = 'https://logredwing.streamlit.app'  # Use your deployed URL
+        flow.redirect_uri = 'http://localhost:8501'  # Adjust based on your deployment
 
         if auth_code is None:
             auth_url, _ = flow.authorization_url(prompt='consent')
