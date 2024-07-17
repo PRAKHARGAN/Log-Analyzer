@@ -1,4 +1,6 @@
+# ui.py
 import streamlit as st
+import os
 from drive import authenticate_gdrive, list_items, download_file
 from log_analysis import detect_flight_phases
 
@@ -32,21 +34,30 @@ def main_app():
                 file_id = file_ids[selected_file]
                 st.write(f'You selected: {selected_folder}/{selected_subfolder}/{selected_file}')
 
-                # Add buttons
-                if st.button('Download the Log'):
-                    local_file_path = download_file(service, file_id, selected_file)
-                    st.write(f'{selected_file} downloaded successfully.')
-
                 if st.button('Analyze the Log'):
-                    local_file_path = download_file(service, file_id, selected_file)
-                    phases = detect_flight_phases(local_file_path)
-                    st.write("Flight Phases Detected:")
-                    for phase in phases:
-                        st.write(f"Phase: {phase[0]}, Energy Consumed (Wh): {phase[1]}, "
-                                 f"Distance Traveled (m): {phase[2]}, Altitude (m): {phase[3]}, Whr/Km: {phase[4]}")
+                    try:
+                        # Download the file to a temporary location
+                        local_file_path = download_file(service, file_id, 'LOG.bin')
+
+                        if local_file_path:
+                            # Analyze the downloaded file
+                            phases = detect_flight_phases(local_file_path)
+
+                            # Display analysis results
+                            st.write("Flight Phases Detected:")
+                            for phase in phases:
+                                st.write(f"Phase: {phase[0]}, Energy Consumed (Wh): {phase[1]}, "
+                                         f"Distance Traveled (m): {phase[2]}, Altitude (m): {phase[3]}, Whr/Km: {phase[4]}")
+
+                            # Clean up: Delete the temporary file
+                            os.remove(local_file_path)
+                        else:
+                            st.error("Failed to download the file. Please try again.")
+
+                    except Exception as e:
+                        st.error(f"An error occurred during analysis: {e}")
 
     if st.button('Reauthorize'):
         if os.path.exists('token.pickle'):
             os.remove('token.pickle')
         st.write('Please restart the application to reauthorize.')
-
