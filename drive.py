@@ -1,9 +1,9 @@
 # drive.py
 import os
+import io
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-import streamlit as st
 
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 
@@ -32,5 +32,5 @@ def list_items(service, folder_id, mime_type):
 
 def download_file(service, file_id, file_name):
     request = service.files().get_media(fileId=file_id)
-    file_data = request.execute()
+    file_data = io.BytesIO(request.execute())
     return file_data
