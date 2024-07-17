@@ -1,14 +1,10 @@
-# ui.py
 import streamlit as st
 import os
-from drive import authenticate_gdrive, list_items, download_file
+from drive import list_items, download_file
 from log_analysis import detect_flight_phases
 
-
-def main_app():
+def main_app(service):
     st.title('Log Analyzer')
-
-    service = authenticate_gdrive()
 
     root_folder_id = '1dOD1aA8HWB9Rjus7nG9Phld3LjoZ6YZG'  # Replace with your actual root folder ID
     folders = list_items(service, root_folder_id, 'application/vnd.google-apps.folder')
