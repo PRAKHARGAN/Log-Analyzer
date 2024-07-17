@@ -1,5 +1,6 @@
+# app.py
 import streamlit as st
-from drive import authenticate_gdrive, list_items
+from drive import authenticate_gdrive
 from ui import main_app
 from auth import show_login
 
