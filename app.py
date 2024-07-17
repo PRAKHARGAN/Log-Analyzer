@@ -18,7 +18,7 @@ def main_app():
         selected_folder_id = folder_ids[selected_folder]
         subfolders = list_items(service, selected_folder_id, 'application/vnd.google-apps.folder')
         subfolder_names = [subfolder['name'] for subfolder in subfolders]
-        subfolder_ids = {subfolder['name']: subfolder['id'] for subfolder in subfolders]
+        subfolder_ids = {subfolder['name']: subfolder['id'] for subfolder in subfolders}
         selected_subfolder = st.selectbox("Select a subfolder", subfolder_names)
 
         if selected_subfolder:
