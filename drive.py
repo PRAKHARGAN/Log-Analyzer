@@ -1,3 +1,4 @@
+# drive.py
 import os
 import pickle
 import base64
@@ -27,12 +28,15 @@ def authenticate_gdrive(auth_code=None):
         flow.redirect_uri = 'https://redwing-labs-log-analyzer.onrender.com/'
 
         if auth_code:
-            flow.fetch_token(code=auth_code)
-            creds = flow.credentials
+            try:
+                flow.fetch_token(code=auth_code)
+                creds = flow.credentials
 
-            # Save the credentials for the next run
-            with open(TOKEN_PATH, 'wb') as token:
-                pickle.dump(creds, token)
+                # Save the credentials for the next run
+                with open(TOKEN_PATH, 'wb') as token:
+                    pickle.dump(creds, token)
+            except Exception as e:
+                raise Exception(f"Failed to fetch token: {e}")
         else:
             auth_url, _ = flow.authorization_url(prompt='consent')
             return auth_url  # Return the URL for the user to visit
@@ -40,39 +44,17 @@ def authenticate_gdrive(auth_code=None):
     service = build('drive', 'v3', credentials=creds)
     return service
 
-# Function to list items in a folder
-def list_items(service, folder_id='root', mime_type=None):
-    query = f"'{folder_id}' in parents"
-    if mime_type:
-        query += f" and mimeType = '{mime_type}'"
-    try:
-        results = service.files().list(
-            q=query,
-            spaces='drive',
-            fields='files(id, name, mimeType)'
-        ).execute()
-        items = results.get('files', [])
-        return items
-    except Exception as e:
-        print(f"An error occurred while listing items: {e}")
-        return []
+# Include other Google Drive related functions here
+def list_items(service, folder_id):
+    # Example function to list items in a folder
+    results = service.files().list(q=f"'{folder_id}' in parents", pageSize=10, fields="files(id, name)").execute()
+    return results.get('files', [])
 
-# Function to download a file
-def download_file(service, file_id, file_name):
-    try:
-        request = service.files().get_media(fileId=file_id)
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
+def download_file(service, file_id, destination):
+    request = service.files().get_media(fileId=file_id)
+    with open(destination, 'wb') as f:
+        downloader = MediaIoBaseDownload(f, request)
         done = False
-        while not done:
+        while done is False:
             status, done = downloader.next_chunk()
-
-        with open(file_name, 'wb') as f:
-            fh.seek(0)
-            f.write(fh.read())
-
-        return file_name
-
-    except Exception as e:
-        print(f"An error occurred during download: {e}")
-        return None
+            print(f"Download {int(status.progress() * 100)}%.")
