@@ -1,6 +1,7 @@
 # drive.py
 import os
 import pickle
+import base64
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -11,7 +12,12 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 TOKEN_PATH = 'token.pickle'
 CREDENTIALS_PATH = 'credentials.json'
 
-# Function to authenticate Google Drive
+# Decode the Base64 credentials and write to 'credentials.json'
+base64_credentials = os.getenv('GOOGLE_CREDENTIALS_BASE64')
+if base64_credentials:
+    with open(CREDENTIALS_PATH, 'wb') as f:
+        f.write(base64.b64decode(base64_credentials))
+
 def authenticate_gdrive(auth_code=None):
     creds = None
 
@@ -21,14 +27,17 @@ def authenticate_gdrive(auth_code=None):
 
     if not creds or not creds.valid:
         flow = Flow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
-        flow.redirect_uri = 'https://redwing-labs-log-analyzer.onrender.com/'  # Ensure correct redirect URI
+        flow.redirect_uri = 'https://redwing-labs-log-analyzer.onrender.com/'  # Update to match the one in Google Cloud Console
 
         if auth_code:
             flow.fetch_token(code=auth_code)
+            creds = flow.credentials
 
+            # Save the credentials for the next run
+            with open(TOKEN_PATH, 'wb') as token:
+                pickle.dump(creds, token)
         else:
             auth_url, _ = flow.authorization_url(prompt='consent')
-
             return auth_url  # Return the URL for the user to visit
 
     service = build('drive', 'v3', credentials=creds)
