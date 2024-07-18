@@ -10,8 +10,12 @@ def main():
         auth_code = st.experimental_get_query_params().get('code')
 
         if auth_code:
-            st.session_state.service = authenticate_gdrive(auth_code)
-            st.success("Successfully authenticated with Google Drive!")
+            st.write(f"Authorization code: {auth_code}")  # Debugging line
+            try:
+                st.session_state.service = authenticate_gdrive(auth_code[0])
+                st.success("Successfully authenticated with Google Drive!")
+            except Exception as e:
+                st.error(f"Failed to authenticate: {e}")
         else:
             auth_url = authenticate_gdrive()
             if auth_url:
