@@ -1,11 +1,8 @@
-# drive.py
 import os
 import pickle
 import base64
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
-import io
 
 # OAuth 2.0 setup
 SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -27,7 +24,7 @@ def authenticate_gdrive(auth_code=None):
 
     if not creds or not creds.valid:
         flow = Flow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
-        flow.redirect_uri = 'https://redwing-labs-log-analyzer.onrender.com/'  # Update to match the one in Google Cloud Console
+        flow.redirect_uri = 'https://redwing-labs-log-analyzer.onrender.com/'
 
         if auth_code:
             flow.fetch_token(code=auth_code)
