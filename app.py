@@ -1,25 +1,29 @@
 # app.py
 import streamlit as st
 from drive import authenticate_gdrive
-from ui import main_app
-from auth import show_login
 
 def main():
-    query_params = st.experimental_get_query_params()
-    auth_code = query_params.get('code', [None])[0]
+    st.title("Google Drive Authentication")
 
+    # Check if the user is already authenticated
     if 'service' not in st.session_state:
+        auth_code = st.experimental_get_query_params().get('code')
+
         if auth_code:
-            service = authenticate_gdrive(auth_code)
-            st.session_state.service = service
-            st.experimental_rerun()
+            st.session_state.service = authenticate_gdrive(auth_code)
+            st.success("Successfully authenticated with Google Drive!")
         else:
             auth_url = authenticate_gdrive()
-            st.write(f'Please go to the following URL to authenticate: [Authenticate here]({auth_url})')
+            if auth_url:
+                st.write(f"[Authenticate here]({auth_url})")
+            else:
+                st.error("Unable to generate authentication URL. Please try again later.")
 
+    # Continue with your app logic
     if 'service' in st.session_state:
-        if show_login():
-            main_app(st.session_state.service)
+        service = st.session_state.service
+        # Your app logic here
+        st.write("Your app logic here.")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
